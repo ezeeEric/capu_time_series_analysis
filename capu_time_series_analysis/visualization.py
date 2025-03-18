@@ -12,7 +12,6 @@ import os
 from typing import List
 
 import pandas as pd
-
 import wandb
 
 logger = logging.getLogger(__name__)

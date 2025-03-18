@@ -1,8 +1,7 @@
 # capu_time_series_analysis
 
-
 ```
-python -m venv venv  
+python -m venv venv
 source venv/bin/activate
 python -m pip install -r requirements.txt
 ```

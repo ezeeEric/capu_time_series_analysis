@@ -56,7 +56,7 @@ train_end_term <- strtoi(substr(df$TermCode[36], 5, 5))
 test_start_year <- strtoi(substr(df$TermCode[37], 1, 4))
 test_start_term <- strtoi(substr(df$TermCode[37], 5, 5))
 
-ts_df <- ts(df[,5], start=c(df_start_year,df_start_term), frequency=3)   
+ts_df <- ts(df[,5], start=c(df_start_year,df_start_term), frequency=3)
 train <- window(ts_df, end=c(train_end_year,train_end_term))
 test <- window(ts_df, start=c(test_start_year,test_start_term))
 
@@ -67,12 +67,12 @@ test <- window(ts_df, start=c(test_start_year,test_start_term))
 # split the metric name by uppercase
 mt_name <- gsub("(?!^)(?=[[:upper:]])", " ", mt, perl=T)
 
-autoplot(train, color="blue", series="Training") + 
-  forecast::autolayer(test, color="red", series="Test Set") + 
-  ggtitle(paste(df$Level, df$Residency, mt_name, "", df$TermCode[1], "-", tail(df$TermCode, 1))) + 
-  xlab("Year") + 
+autoplot(train, color="blue", series="Training") +
+  forecast::autolayer(test, color="red", series="Test Set") +
+  ggtitle(paste(df$Level, df$Residency, mt_name, "", df$TermCode[1], "-", tail(df$TermCode, 1))) +
+  xlab("Year") +
   ylab(mt_name) +
-  scale_color_manual(values = c("blue", "red")) +  
+  scale_color_manual(values = c("blue", "red")) +
   guides(colour=guide_legend(title="Data Set"))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -85,7 +85,7 @@ fit.snaive <- snaive(train, h=length(test))
 
 # ETS Model
 # The ets() function auto-selects the best ETS model by optimizing parameters (minimizing AICc)
-fit.ets <- ets(train) 
+fit.ets <- ets(train)
 summary(fit.ets)
 
 # ARIMA Model
@@ -104,9 +104,9 @@ fit.arima.test <- forecast(fit.arima, h=length(test))
 cbind(test, fit.ets.test$mean, fit.arima.test$mean, fit.snaive$mean)
 
 autoplot(test, size=0.8, color="black") +
-  autolayer(ts_df, color="black") + 
-  forecast::autolayer(fit.ets.test$mean, series="Best ETS") +   
-  forecast::autolayer(fit.arima.test$mean, series="Best ARIMA") + 
+  autolayer(ts_df, color="black") +
+  forecast::autolayer(fit.ets.test$mean, series="Best ETS") +
+  forecast::autolayer(fit.arima.test$mean, series="Best ARIMA") +
   forecast::autolayer(fit.snaive, series="Seasonal Naive", PI=FALSE) +
   ggtitle("Model Forecasts on Test Set") +
   xlab("Year") + ylab(mt_name) +
@@ -119,16 +119,16 @@ rbind(best.ets = accuracy(fit.ets.test, test)[2,c(2,3)],
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 7. Check training set residuals
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# This step ensures that the model fits the data well and that the residuals (errors) resemble white noise. 
-# The checkresiduals() function performs several diagnostic tests to check if the residuals of the fitted model resemble white noise. 
+# This step ensures that the model fits the data well and that the residuals (errors) resemble white noise.
+# The checkresiduals() function performs several diagnostic tests to check if the residuals of the fitted model resemble white noise.
 # 1) Residual plot: A random scatter of residuals around zero would suggest that the model has captured the data well.
 # 2) ACF plot: If there are no significant spikes, it means the residuals are uncorrelated, which is a good sign.
 # 3) Ljung-Box Test: If the p-value is large (>=0.05), you can conclude that there’s no significant autocorrelation in the residuals.
-# 4) Mean of residuals: Ideally, the mean should be close to zero. If it's significantly different from zero, the model might be biased. 
+# 4) Mean of residuals: Ideally, the mean should be close to zero. If it's significantly different from zero, the model might be biased.
 # Models that didn't pass all of the residual tests may still be used for forecasting but the prediction intervals may not be accurate due to the correlated residuals. In practice, we would normally use the best model we could find, even if it didn't pass all of the tests.
 
 checkresiduals(fit.snaive)
-mean(residuals(fit.snaive), na.rm=TRUE) 
+mean(residuals(fit.snaive), na.rm=TRUE)
 
 checkresiduals(fit.ets)
 mean(residuals(fit.ets), na.rm=TRUE)
@@ -148,7 +148,7 @@ mean(residuals(fit.arima), na.rm=TRUE)
 
 # Apply the previously fitted model parameters (based on the training set) to the full data set to forecast for the real future (in our case, the next 3 years)
 
-# The auto ets() model is selected as the best model as it has the best accuracy on test set and performs well on residual tests. 
+# The auto ets() model is selected as the best model as it has the best accuracy on test set and performs well on residual tests.
 fit.ets.forecast <- forecast(ets(ts_df, model=fit.ets, use.initial.values=TRUE), h=length(test))
 
 best.forecast <- fit.ets.forecast  # Replace the best model as needed
@@ -158,14 +158,14 @@ summary(best.forecast)
 # 9. Forecast future using the best model
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-best.forecast  # .000=Spring, .333=Summer, .667=Fall. 
+best.forecast  # .000=Spring, .333=Summer, .667=Fall.
 
 future_start <- paste(as.character(strtoi(substr(df$TermCode[1],1,4)) + 15), substr(df$TermCode[1],5,6), sep="")
 future_end <- paste(as.character(strtoi(substr(df$TermCode[45],1,4)) + 3), substr(df$TermCode[45],5,6), sep="")
 
-autoplot(best.forecast) + 
-  ggtitle(paste(df$Level, df$Residency, mt_name, "Forecasts", future_start, "-", future_end)) + 
-  xlab("Year") + 
+autoplot(best.forecast) +
+  ggtitle(paste(df$Level, df$Residency, mt_name, "Forecasts", future_start, "-", future_end)) +
+  xlab("Year") +
   ylab(mt_name)
 # The further ahead we forecast, the more uncertainty is associated with the forecast, and thus the wider the prediction intervals.
 
@@ -183,7 +183,7 @@ cbind(best.ets = fit.ets.forecast$mean,
 
 autoplot(ts_df) +
   forecast::autolayer(fit.ets.forecast$mean, series="Best ETS") +
-  forecast::autolayer(fit.arima.forecast$mean, series="Best ARIMA") + 
+  forecast::autolayer(fit.arima.forecast$mean, series="Best ARIMA") +
   forecast::autolayer(fit.snaive.forecast, series="Seasonal Naive", PI=FALSE) +
   ggtitle("Forecasts for the Future 202320-202610") +
   xlab("Year") + ylab("Course Enrolment") +
@@ -232,4 +232,3 @@ if (file.exists(file_path)) {
 
 
 ### Repeat the whole process for all levels of analysis (defined in Step 2) to generate a complete Excel output file.
-

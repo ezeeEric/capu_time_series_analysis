@@ -12,6 +12,7 @@ version: 250301
 """
 import logging
 import os
+from typing import Any, Dict, List, Optional, Tuple
 
 import hydra
 import pandas as pd
@@ -23,7 +24,10 @@ from capu_time_series_analysis.data_loader import (
     load_data,
     prepare_time_series,
 )
-from capu_time_series_analysis.evaluation import analyze_residuals, evaluate_forecasts
+from capu_time_series_analysis.evaluation import (
+    analyze_residuals,
+    evaluate_forecasts,
+)
 from capu_time_series_analysis.models import fit_models
 from capu_time_series_analysis.visualization import log_results_to_wandb
 
@@ -37,15 +41,15 @@ logger = logging.getLogger()
 
 
 def calculate_residuals(
-    fit_snaive,
-    fit_ets,
-    fit_arima,
-    train_series,
-    residual_diagnostics,
-    mt,
-    resd,
-    level,
-):
+    fit_snaive: Any,
+    fit_ets: Any,
+    fit_arima: Any,
+    train_series: pd.Series,
+    residual_diagnostics: List[Dict[str, Any]],
+    mt: str,
+    resd: str,
+    level: str,
+) -> List[Dict[str, Any]]:
     snaive_residuals = analyze_residuals(
         fit_snaive, train_series, "Seasonal Naive"
     )
@@ -78,13 +82,13 @@ def calculate_residuals(
 
 
 def process_timeseries(
-    input_file,
-    metrics,
-    residencies,
-    levels,
-    forecast_steps=9,
-    model_params=None,
-):
+    input_file: str,
+    metrics: List[str],
+    residencies: List[str],
+    levels: List[str],
+    forecast_steps: int = 9,
+    model_params: Optional[Dict[str, Dict[str, Any]]] = None,
+) -> Tuple[pd.DataFrame, List[Dict[str, Any]], List[Dict[str, Any]]]:
     """
     Process time series data for different combinations of metrics, residencies, and levels.
 
@@ -123,10 +127,10 @@ def process_timeseries(
     )
 
     # Dictionary to store evaluation metrics
-    evaluation_results = []
+    evaluation_results: List[Dict[str, Any]] = []
 
     # Dictionary to store residual diagnostics
-    residual_diagnostics = []
+    residual_diagnostics: List[Dict[str, Any]] = []
 
     # Process all combinations and build consolidated dataframe
     for mt in metrics:

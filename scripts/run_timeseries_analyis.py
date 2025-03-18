@@ -16,7 +16,18 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import hydra
 import pandas as pd
+import pyrootutils
 from omegaconf import DictConfig, OmegaConf
+
+ROOT_PATH = pyrootutils.setup_root(
+    search_from=__file__,
+    indicator=".project_root",
+    project_root_env_var=True,
+    dotenv=True,
+    pythonpath=True,
+    cwd=True,
+)
+
 
 # Import utility modules
 from capu_time_series_analysis.data_loader import (
@@ -262,7 +273,7 @@ def process_timeseries(
     return consolidated_df, evaluation_results, residual_diagnostics
 
 
-@hydra.main(config_path="conf", config_name="config")
+@hydra.main(config_path=f"{ROOT_PATH}/configs", config_name="default")
 def main(cfg: DictConfig) -> None:
     """
     Main execution function for the time series processing pipeline.

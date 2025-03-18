@@ -1,5 +1,5 @@
-input_file: "/data/capu_enrolment_data_200820-202310_v20230213.csv"
-plot_dir: "output/plots"
+input_file: "${hydra:runtime.cwd}/data/input/capu_enrolment_data_200820-202310_v20230213.csv"
+plot_dir: "${hydra:runtime.cwd}/output/plots"
 
 # Analysis parameters
 levels:

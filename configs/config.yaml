@@ -1,0 +1,36 @@
+input_file: "/data/capu_enrolment_data_200820-202310_v20230213.csv"
+plot_dir: "output/plots"
+
+# Analysis parameters
+levels:
+  - "CapU"
+  - "AS"
+  # - "BPS"
+  # - "EHHD"
+  # - "FAA"
+  # - "GCS"
+residencies:
+  - "Domestic"
+  - "International"
+metrics:
+  - "Headcount"
+  # - "CourseEnrolment"
+  # - "AttemptedCredits"
+
+# Forecasting parameters
+forecast_steps: 9
+
+# Model configuration
+models:
+  seasonal_naive_params:
+    seasonal_periods: 3  # Default value
+
+  ets_params:
+    seasonal: "add"     # Additive seasonality
+    damped_trend: false  # Use damped trend
+
+  arima_params:
+    seasonal: true
+    m: 3                # Seasonal period
+    d: 0                # Non-seasonal differencing
+    D: 0                # Seasonal differencing

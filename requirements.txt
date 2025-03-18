@@ -1,0 +1,13 @@
+black
+flake8
+hydra-core
+jupyter
+matplotlib
+numpy
+pandas
+pre-commit
+pyrootutils
+scikit-learn
+scipy
+statsmodels
+wandb[sweeps]

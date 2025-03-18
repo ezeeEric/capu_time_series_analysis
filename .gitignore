@@ -1,3 +1,11 @@
+*png
+venv*/
+output/
+outputs/
+**/.DS_Store
+.python-version
+/wandb/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

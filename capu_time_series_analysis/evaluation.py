@@ -191,3 +191,44 @@ def analyze_residuals(
         "actual_fitted_plot": fit_img_str,
         "white_noise": white_noise,
     }
+
+
+def calculate_residuals(
+    fit_snaive: Any,
+    fit_ets: Any,
+    fit_arima: Any,
+    train_series: pd.Series,
+    residual_diagnostics: List[Dict[str, Any]],
+    mt: str,
+    resd: str,
+    level: str,
+) -> List[Dict[str, Any]]:
+    snaive_residuals = analyze_residuals(
+        fit_snaive, train_series, "Seasonal Naive"
+    )
+    ets_residuals = analyze_residuals(fit_ets, train_series, "ETS")
+    arima_residuals = analyze_residuals(fit_arima, train_series, "ARIMA")
+
+    # Add residual diagnostics to the collection
+    for model_name, diag in [
+        ("Seasonal Naive", snaive_residuals),
+        ("ETS", ets_residuals),
+        ("ARIMA", arima_residuals),
+    ]:
+        residual_diagnostics.append(
+            {
+                "Analysis_Type": mt,
+                "Residency": resd,
+                "Level": level,
+                "Model": model_name,
+                "Mean_Residual": diag["mean_residual"],
+                "Std_Residual": diag["std_residual"],
+                "Ljung_Box_Stat": diag["ljung_box_stat"],
+                "Ljung_Box_pvalue": diag["ljung_box_pvalue"],
+                "Normality_pvalue": diag["residuals_normal_pvalue"],
+                "White_Noise": diag["white_noise"],
+                "Residuals_Plot": diag["residuals_plot"],
+                "Actual_Fitted_Plot": diag["actual_fitted_plot"],
+            }
+        )
+    return residual_diagnostics

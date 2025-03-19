@@ -6,8 +6,6 @@ This module provides custom time series forecasting models and wrappers
 for other statistical models.
 """
 
-from typing import Tuple
-
 import pandas as pd
 from statsmodels.tsa.holtwinters import ExponentialSmoothing
 from statsmodels.tsa.statespace.sarimax import SARIMAX

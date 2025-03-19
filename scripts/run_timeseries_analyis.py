@@ -18,6 +18,11 @@ import pandas as pd
 import pyrootutils
 from omegaconf import DictConfig, OmegaConf
 
+from capu_time_series_analysis.utils import process_timeseries
+
+# Import utility modules
+from capu_time_series_analysis.visualization import log_results_to_wandb
+
 ROOT_PATH = pyrootutils.setup_root(
     search_from=__file__,
     indicator=".project_root",
@@ -26,11 +31,6 @@ ROOT_PATH = pyrootutils.setup_root(
     pythonpath=True,
     cwd=True,
 )
-
-from capu_time_series_analysis.utils import process_timeseries
-
-# Import utility modules
-from capu_time_series_analysis.visualization import log_results_to_wandb
 
 # Configure logging
 logging.basicConfig(
@@ -53,7 +53,7 @@ def main(cfg: DictConfig) -> None:
     Args:
         cfg (DictConfig): Hydra configuration
     """
-    logger.info(f"Configuration: \n{OmegaConf.to_yaml(cfg)}")
+    logger.info("Configuration: \n%s", OmegaConf.to_yaml(cfg))
 
     input_file = cfg.input_file
     plot_dir = cfg.plot_dir
@@ -68,12 +68,12 @@ def main(cfg: DictConfig) -> None:
     }
 
     logger.info(
-        f"Starting time series forecasting with data from {input_file}"
+        "Starting time series forecasting with data from %s", input_file
     )
 
     if not os.path.exists(plot_dir):
         os.makedirs(plot_dir)
-        logger.info(f"Created plot directory: {plot_dir}")
+        logger.info("Created plot directory: %s", plot_dir)
 
     # Process all combinations and build consolidated dataframe
     consolidated_df, evaluation_results, residual_diagnostics = (
@@ -90,13 +90,14 @@ def main(cfg: DictConfig) -> None:
     # Create evaluation dataframe
     evaluation_df = pd.DataFrame(evaluation_results)
     logger.info(
-        f"Created evaluation dataframe with {len(evaluation_df)} entries"
+        "Created evaluation dataframe with %d entries", len(evaluation_df)
     )
 
     # Create residual diagnostics dataframe
     residual_df = pd.DataFrame(residual_diagnostics)
     logger.info(
-        f"Created residual diagnostics dataframe with {len(residual_df)} entries"
+        "Created residual diagnostics dataframe with %d entries",
+        len(residual_df),
     )
 
     # Log results to wandb
@@ -113,4 +114,5 @@ def main(cfg: DictConfig) -> None:
 
 
 if __name__ == "__main__":
+    # pylint: disable=no-value-for-parameter
     main()

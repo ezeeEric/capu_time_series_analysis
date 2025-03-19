@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""
+Contains utility functions for processing time series data.
+"""
+# -*- coding: utf-8 -*-
 import logging
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -46,7 +50,8 @@ def process_timeseries(
 
     total_combinations = len(levels) * len(residencies) * len(metrics)
     logger.info(
-        f"Processing {total_combinations} combinations of levels, residencies, and metrics"
+        "Processing %d combinations of levels, residencies, and metrics",
+        total_combinations,
     )
 
     current_combination = 0
@@ -76,21 +81,31 @@ def process_timeseries(
             for level in levels:
                 current_combination += 1
                 logger.info(
-                    f"Processing {level} - {resd} - {mt} ({current_combination}/{total_combinations})"
+                    "Processing %s - %s - %s (%d/%d)",
+                    level,
+                    resd,
+                    mt,
+                    current_combination,
+                    total_combinations,
                 )
 
                 # Load data
                 df_subset = load_data(input_file, level, resd, mt)
                 if df_subset.empty:
                     logger.warning(
-                        f"No data for {level} - {resd} - {mt}, skipping..."
+                        "No data for %s - %s - %s, skipping...",
+                        level,
+                        resd,
+                        mt,
                     )
                     continue
 
                 # Prepare time series data
                 train_series, test_series = prepare_time_series(df_subset, mt)
                 logger.debug(
-                    f"Split data into {len(train_series)} training and {len(test_series)} test samples"
+                    "Split data into %d training and %d test samples",
+                    len(train_series),
+                    len(test_series),
                 )
 
                 # Add training data to consolidated df
@@ -104,7 +119,7 @@ def process_timeseries(
                 )
 
                 # Fit models
-                logger.info(f"Fitting models for {level} - {resd} - {mt}")
+                logger.info("Fitting models for %s - %s - %s", level, resd, mt)
                 fit_snaive, fit_ets, fit_arima = fit_models(
                     train_series,
                     seasonal_naive_params=model_params.get(
@@ -115,7 +130,9 @@ def process_timeseries(
                 )
 
                 # Analyze residuals for each model
-                logger.info(f"Analyzing residuals for {level} - {resd} - {mt}")
+                logger.info(
+                    "Analyzing residuals for %s - %s - %s", level, resd, mt
+                )
                 residual_diagnostics = calculate_residuals(
                     fit_snaive,
                     fit_ets,
@@ -129,7 +146,10 @@ def process_timeseries(
 
                 # Forecast test data
                 logger.info(
-                    f"Creating forecasts for test period ({level} - {resd} - {mt})"
+                    "Creating forecasts for test period (%s - %s - %s)",
+                    level,
+                    resd,
+                    mt,
                 )
                 snaive_forecast = fit_snaive.forecast(steps=len(test_series))
                 ets_forecast = fit_ets.forecast(steps=len(test_series))
@@ -152,7 +172,11 @@ def process_timeseries(
 
                 # Forecast future (configurable steps ahead)
                 logger.info(
-                    f"Creating future forecasts ({forecast_steps} steps ahead) for {level} - {resd} - {mt}"
+                    "Creating future forecasts (%d steps ahead) for %s - %s - %s",
+                    forecast_steps,
+                    level,
+                    resd,
+                    mt,
                 )
                 future_snaive = fit_snaive.forecast(steps=forecast_steps)
                 future_ets = fit_ets.forecast(steps=forecast_steps)
@@ -175,7 +199,10 @@ def process_timeseries(
 
                 # Evaluate forecast accuracy on test set
                 logger.info(
-                    f"Evaluating forecast accuracy for {level} - {resd} - {mt}"
+                    "Evaluating forecast accuracy for %s - %s - %s",
+                    level,
+                    resd,
+                    mt,
                 )
                 forecast_evaluation = evaluate_forecasts(
                     test_series,

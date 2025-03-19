@@ -203,6 +203,9 @@ def calculate_residuals(
     resd: str,
     level: str,
 ) -> List[Dict[str, Any]]:
+    """
+    Calculate residuals for each model and add diagnostics to the collection.
+    """
     snaive_residuals = analyze_residuals(
         fit_snaive, train_series, "Seasonal Naive"
     )

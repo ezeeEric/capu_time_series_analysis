@@ -5,17 +5,20 @@ Evaluation utilities for time series forecasting models.
 This module provides functions to evaluate forecasting models and analyze residuals.
 """
 
-import base64
-import io
 import os
 from typing import Any, Dict, List, Optional
 
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from scipy import stats
-from statsmodels.graphics.tsaplots import plot_acf
 from statsmodels.stats.diagnostic import acorr_ljungbox
+
+from capu_time_series_analysis.plotting import (
+    fig_to_base64,
+    plot_actual_vs_fitted,
+    plot_residuals_analysis,
+    save_figure,
+)
 
 
 def evaluate_forecasts(
@@ -105,6 +108,7 @@ def analyze_residuals(
             "residuals_normal_pvalue": np.nan,
             "residuals_plot": None,
             "acf_plot": None,
+            "actual_fitted_plot": None,
             "white_noise": False,
         }
 
@@ -131,70 +135,29 @@ def analyze_residuals(
     else:
         norm_pvalue = np.nan
 
-    # 4. Create residuals plot
-    plt.figure(figsize=(10, 8))
+    # 4. Create plots using the plotting utilities
+    residuals_fig, acf_fig = plot_residuals_analysis(residuals, model_name)
+    actual_fitted_fig = plot_actual_vs_fitted(
+        actual_values, fitted_values, model_name
+    )
 
-    # Subplot 1: Residual time plot
-    plt.subplot(2, 1, 1)
-    plt.plot(residuals.index, residuals, "o-")
-    plt.axhline(y=0, color="r", linestyle="-")
-    plt.title(f"Residual Analysis for {model_name}")
-    plt.ylabel("Residuals")
+    # Convert figures to base64 strings
+    residuals_img_str = fig_to_base64(residuals_fig)
+    acf_img_str = fig_to_base64(acf_fig)
+    fit_img_str = fig_to_base64(actual_fitted_fig)
 
-    # Subplot 2: ACF plot
-    plt.subplot(2, 1, 2)
-    if len(residuals) > 5:  # Need reasonable number of points for ACF
-        plot_acf(
-            residuals.values, lags=min(20, len(residuals) - 1), alpha=0.05
-        )
-        plt.title("ACF of Residuals")
-    else:
-        plt.text(
-            0.5,
-            0.5,
-            "Insufficient data for ACF plot",
-            horizontalalignment="center",
-            verticalalignment="center",
-        )
-        plt.title("ACF of Residuals (not enough data)")
-
-    plt.tight_layout()
-
-    # Save plot to a bytes buffer
-    buf = io.BytesIO()
-    plt.savefig(buf, format="png")
-
-    # Save to disk if requested
+    # Save plots to disk if requested
     if save_plots and plots_dir is not None:
         os.makedirs(plots_dir, exist_ok=True)
-        plt.savefig(os.path.join(plots_dir, f"{model_name}_residuals.png"))
-
-    plt.close()
-    buf.seek(0)
-    img_str = base64.b64encode(buf.read()).decode("utf-8")
-
-    # Create a second figure for actual vs fitted
-    plt.figure(figsize=(10, 6))
-    plt.plot(actual_values.index, actual_values, "b-", label="Actual")
-    plt.plot(fitted_values.index, fitted_values, "r--", label="Fitted")
-    plt.title(f"Actual vs Fitted Values - {model_name}")
-    plt.legend()
-    plt.tight_layout()
-
-    # Save the second plot to a bytes buffer
-    buf2 = io.BytesIO()
-    plt.savefig(buf2, format="png")
-
-    # Save to disk if requested
-    if save_plots and plots_dir is not None:
-        os.makedirs(plots_dir, exist_ok=True)
-        plt.savefig(
-            os.path.join(plots_dir, f"{model_name}_actual_vs_fitted.png")
+        save_figure(
+            residuals_fig,
+            os.path.join(plots_dir, f"{model_name}_residuals.png"),
         )
-
-    plt.close()
-    buf2.seek(0)
-    fit_img_str = base64.b64encode(buf2.read()).decode("utf-8")
+        save_figure(acf_fig, os.path.join(plots_dir, f"{model_name}_acf.png"))
+        save_figure(
+            actual_fitted_fig,
+            os.path.join(plots_dir, f"{model_name}_actual_vs_fitted.png"),
+        )
 
     # Determine if residuals resemble white noise
     # Criteria: p-value of Ljung-Box test > 0.05, mean close to 0
@@ -208,7 +171,8 @@ def analyze_residuals(
         "ljung_box_stat": lb_stat,
         "ljung_box_pvalue": lb_pvalue,
         "residuals_normal_pvalue": norm_pvalue,
-        "residuals_plot": img_str,
+        "residuals_plot": residuals_img_str,
+        "acf_plot": acf_img_str,
         "actual_fitted_plot": fit_img_str,
         "white_noise": white_noise,
     }

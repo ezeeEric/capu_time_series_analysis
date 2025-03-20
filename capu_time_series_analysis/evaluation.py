@@ -7,7 +7,8 @@ This module provides functions to evaluate forecasting models and analyze residu
 
 import base64
 import io
-from typing import Any, Dict, List
+import os
+from typing import Any, Dict, List, Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -56,7 +57,11 @@ def evaluate_forecasts(
 
 
 def analyze_residuals(
-    model, train_series: pd.Series, model_name: str
+    model,
+    train_series: pd.Series,
+    model_name: str,
+    save_plots: bool = False,
+    plots_dir: Optional[str] = None,
 ) -> Dict[str, Any]:
     """
     Analyze residuals of a fitted model to check if they resemble white noise.
@@ -65,6 +70,8 @@ def analyze_residuals(
         model: Fitted time series model (SeasonalNaive, ExponentialSmoothing, or SARIMAX)
         train_series: Original training data
         model_name: Name of the model for identification
+        save_plots: Whether to save plots to disk (default: False)
+        plots_dir: Directory to save plots to (required if save_plots is True)
 
     Returns:
         Dictionary with residual analysis metrics and plots
@@ -156,6 +163,12 @@ def analyze_residuals(
     # Save plot to a bytes buffer
     buf = io.BytesIO()
     plt.savefig(buf, format="png")
+
+    # Save to disk if requested
+    if save_plots and plots_dir is not None:
+        os.makedirs(plots_dir, exist_ok=True)
+        plt.savefig(os.path.join(plots_dir, f"{model_name}_residuals.png"))
+
     plt.close()
     buf.seek(0)
     img_str = base64.b64encode(buf.read()).decode("utf-8")
@@ -171,6 +184,14 @@ def analyze_residuals(
     # Save the second plot to a bytes buffer
     buf2 = io.BytesIO()
     plt.savefig(buf2, format="png")
+
+    # Save to disk if requested
+    if save_plots and plots_dir is not None:
+        os.makedirs(plots_dir, exist_ok=True)
+        plt.savefig(
+            os.path.join(plots_dir, f"{model_name}_actual_vs_fitted.png")
+        )
+
     plt.close()
     buf2.seek(0)
     fit_img_str = base64.b64encode(buf2.read()).decode("utf-8")
@@ -202,15 +223,40 @@ def calculate_residuals(
     mt: str,
     resd: str,
     level: str,
+    save_plots: bool = False,
+    plots_dir: Optional[str] = None,
 ) -> List[Dict[str, Any]]:
     """
     Calculate residuals for each model and add diagnostics to the collection.
+
+    Args:
+        fit_snaive: Fitted seasonal naive model
+        fit_ets: Fitted ETS model
+        fit_arima: Fitted ARIMA model
+        train_series: Original training data
+        residual_diagnostics: Collection to add diagnostics to
+        mt: Analysis type
+        resd: Residency type
+        level: Level identifier
+        save_plots: Whether to save plots to disk (default: False)
+        plots_dir: Directory to save plots to (required if save_plots is True)
     """
+    # If saving plots, create a specific directory for this analysis
+    if save_plots and plots_dir is not None:
+        analysis_dir = os.path.join(plots_dir, f"{mt}_{resd}_{level}")
+        os.makedirs(analysis_dir, exist_ok=True)
+    else:
+        analysis_dir = None
+
     snaive_residuals = analyze_residuals(
-        fit_snaive, train_series, "Seasonal Naive"
+        fit_snaive, train_series, "Seasonal Naive", save_plots, analysis_dir
     )
-    ets_residuals = analyze_residuals(fit_ets, train_series, "ETS")
-    arima_residuals = analyze_residuals(fit_arima, train_series, "ARIMA")
+    ets_residuals = analyze_residuals(
+        fit_ets, train_series, "ETS", save_plots, analysis_dir
+    )
+    arima_residuals = analyze_residuals(
+        fit_arima, train_series, "ARIMA", save_plots, analysis_dir
+    )
 
     # Add residual diagnostics to the collection
     for model_name, diag in [

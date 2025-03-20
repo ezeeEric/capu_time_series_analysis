@@ -30,6 +30,8 @@ def process_timeseries(
     levels: List[str],
     forecast_steps: int = 9,
     model_params: Optional[Dict[str, Dict[str, Any]]] = None,
+    save_plots: bool = False,
+    plots_dir: Optional[str] = None,
 ) -> Tuple[pd.DataFrame, List[Dict[str, Any]], List[Dict[str, Any]]]:
     """
     Process time series data for different combinations of metrics, residencies, and levels.
@@ -41,6 +43,8 @@ def process_timeseries(
         levels (list): List of academic levels
         forecast_steps (int): Number of steps to forecast into the future
         model_params (dict): Parameters for the forecasting models
+        save_plots (bool): Whether to save plots to disk (default: False)
+        plots_dir (str, optional): Directory to save plots to (required if save_plots is True)
 
     Returns:
         tuple: (consolidated_df, evaluation_results, residual_diagnostics)
@@ -142,6 +146,8 @@ def process_timeseries(
                     mt,
                     resd,
                     level,
+                    save_plots=save_plots,
+                    plots_dir=plots_dir,
                 )
 
                 # Forecast test data

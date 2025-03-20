@@ -1,21 +1,21 @@
-input_file: "${hydra:runtime.cwd}/data/input/capu_enrolment_data_200820-202310_v20230213.csv"
-plot_dir: "${hydra:runtime.cwd}/output/plots"
+input_file: "data/raw/enrollment_data.csv"
+plot_dir: "plots"
+save_plots: false  # Set to true to save plots to disk
 
 # Analysis parameters
 levels:
-  - "CapU"
-  - "AS"
-  # - "BPS"
-  # - "EHHD"
-  # - "FAA"
-  # - "GCS"
+  - "Undergraduate"
+  - "Graduate"
+  - "All Levels"
+
 residencies:
   - "Domestic"
   - "International"
+  - "All Residencies"
+
 metrics:
   - "Headcount"
-  # - "CourseEnrolment"
-  # - "AttemptedCredits"
+  - "FTE"
 
 # Forecasting parameters
 forecast_steps: 9
@@ -23,14 +23,14 @@ forecast_steps: 9
 # Model configuration
 models:
   seasonal_naive_params:
-    seasonal_periods: 3  # Default value
+    seasonal_periods: 4
 
   ets_params:
-    seasonal: "add"     # Additive seasonality
-    damped_trend: false  # Use damped trend
+    seasonal_periods: 4
+    damped_trend: true
+    use_boxcox: true
 
   arima_params:
-    seasonal: true
-    m: 3                # Seasonal period
-    d: 0                # Non-seasonal differencing
-    D: 0                # Seasonal differencing
+    seasonal_periods: 4
+    max_order: [2, 1, 2]
+    max_seasonal_order: [1, 1, 1, 4]

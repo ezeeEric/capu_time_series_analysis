@@ -61,6 +61,10 @@ def main(cfg: DictConfig) -> None:
     residencies = cfg.residencies
     metrics = cfg.metrics
     forecast_steps = cfg.forecast_steps
+    save_plots = cfg.get(
+        "save_plots", False
+    )  # Get save_plots from config or default to False
+
     model_params = {
         "seasonal_naive_params": cfg.models.seasonal_naive_params,
         "ets_params": cfg.models.ets_params,
@@ -71,7 +75,7 @@ def main(cfg: DictConfig) -> None:
         "Starting time series forecasting with data from %s", input_file
     )
 
-    if not os.path.exists(plot_dir):
+    if save_plots and not os.path.exists(plot_dir):
         os.makedirs(plot_dir)
         logger.info("Created plot directory: %s", plot_dir)
 
@@ -84,6 +88,8 @@ def main(cfg: DictConfig) -> None:
             levels,
             forecast_steps=forecast_steps,
             model_params=model_params,
+            save_plots=save_plots,
+            plots_dir=plot_dir if save_plots else None,
         )
     )
 

@@ -46,10 +46,17 @@ class SeasonalNaive:
         # Generate fitted values (shifted by seasonal period)
         self.fitted_values = data.shift(self.seasonal_periods)
 
+        # TODO is this the proper way to calculate residuals?
         # Calculate residuals
-        self.residuals = (
-            data[self.seasonal_periods :]
-            - self.fitted_values[self.seasonal_periods :]
+        # self.residuals = (
+        #     data[self.seasonal_periods :]
+        #     - self.fitted_values[self.seasonal_periods :]
+        # )
+
+        # Calculate residuals
+        mask = ~self.fitted_values.isna()  # Only where we have fitted values
+        self.residuals = pd.Series(
+            index=data.index[mask], data=data[mask] - self.fitted_values[mask]
         )
 
         return self

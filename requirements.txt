@@ -1,6 +1,7 @@
 black
 flake8
 hydra-core
+ipympl
 jupyter
 matplotlib
 numpy
@@ -9,5 +10,6 @@ pre-commit
 pyrootutils
 scikit-learn
 scipy
+seaborn
 statsmodels
 wandb[sweeps]

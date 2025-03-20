@@ -11,7 +11,9 @@ import logging
 import os
 from typing import List
 
+import matplotlib.pyplot as plt
 import pandas as pd
+import seaborn as sns
 import wandb
 
 logger = logging.getLogger(__name__)
@@ -185,3 +187,56 @@ def log_results_to_wandb(
         # Always finish wandb tracking, even if an exception occurs
         logger.info("Finishing wandb logging")
         wandb.finish()
+
+
+# 2. Model Evaluation Metrics Visualization
+def plot_evaluation_metrics(evaluation_df, metric="RMSE", figsize=(14, 8)):
+    """
+    Plot evaluation metrics across all combinations
+
+    Args:
+        evaluation_df: DataFrame with evaluation metrics
+        metric: Which metric to visualize ('MAE', 'RMSE', or 'MAPE')
+    """
+    if metric not in ["MAE", "RMSE", "MAPE"]:
+        raise ValueError("Metric must be one of 'MAE', 'RMSE', or 'MAPE'")
+
+    # Create pivot table for easier plotting
+    pivot_df = evaluation_df.pivot_table(
+        index=["Level", "Residency", "Analysis_Type"],
+        columns="Model",
+        values=metric,
+    ).reset_index()
+
+    # Convert to long format for seaborn
+    melted_df = pd.melt(
+        pivot_df,
+        id_vars=["Level", "Residency", "Analysis_Type"],
+        value_vars=["Seasonal Naive", "ETS", "ARIMA"],
+        var_name="Model",
+        value_name=metric,
+    )
+
+    # Create a unique combination label
+    melted_df["Combination"] = (
+        melted_df["Level"]
+        + " - "
+        + melted_df["Residency"]
+        + " - "
+        + melted_df["Analysis_Type"]
+    )
+
+    # Plot
+    fig, ax = plt.subplots(figsize=figsize)
+
+    sns.barplot(data=melted_df, x="Combination", y=metric, hue="Model", ax=ax)
+
+    # Formatting
+    ax.set_title(f"Model Comparison by {metric}", fontsize=14)
+    ax.set_xlabel("Data Combination", fontsize=12)
+    ax.set_ylabel(metric, fontsize=12)
+    plt.xticks(rotation=45, ha="right")
+    plt.legend(title="Model")
+    plt.tight_layout()
+
+    return fig

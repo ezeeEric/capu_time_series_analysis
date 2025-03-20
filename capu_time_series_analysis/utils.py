@@ -36,6 +36,19 @@ def process_timeseries(
     """
     Process time series data for different combinations of metrics, residencies, and levels.
 
+    This function processes each combination of metrics, residencies, and levels through the following steps:
+    1. Loads data from the input file for the specific combination
+    2. Prepares and splits the time series into training and test sets
+    3. Fits three forecasting models: Seasonal Naive, ETS, and ARIMA
+    4. Analyzes residuals for each model to evaluate their fit quality
+    5. Generates forecasts for the test period to validate model performance
+    6. Creates future forecasts for the specified number of steps ahead
+    7. Evaluates forecast accuracy on the test set using multiple metrics
+    8. Consolidates all results into a single dataframe for easy analysis
+
+    The process is repeated for all combinations of metrics, residencies, and levels,
+    resulting in a comprehensive analysis across all specified dimensions.
+
     Args:
         input_file (str): Path to the input CSV file
         metrics (list): List of metrics to analyze
@@ -48,6 +61,9 @@ def process_timeseries(
 
     Returns:
         tuple: (consolidated_df, evaluation_results, residual_diagnostics)
+            - consolidated_df: DataFrame containing all time series data, forecasts, and actuals
+            - evaluation_results: List of dictionaries with forecast accuracy metrics
+            - residual_diagnostics: List of dictionaries with residual analysis results
     """
     if model_params is None:
         model_params = {}
@@ -132,7 +148,6 @@ def process_timeseries(
                     ets_params=model_params.get("ets_params", {}),
                     arima_params=model_params.get("arima_params", {}),
                 )
-
                 # Analyze residuals for each model
                 logger.info(
                     "Analyzing residuals for %s - %s - %s", level, resd, mt

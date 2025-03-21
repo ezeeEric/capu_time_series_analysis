@@ -75,9 +75,8 @@ capu_time_series_analysis/
 │   ├── input/                 # Input data files
 │   └── jiaqi_original/        # Original R script and data
 ├── notebooks/                 # Jupyter notebooks
-│   ├── exploratory_analysis.ipynb  # Initial data exploration
-│   ├── model_comparison.ipynb     # Detailed model comparison and analysis
-│   └── forecast_visualization.ipynb  # Interactive forecast visualizations
+│   ├── 250319_TimeSeriesAnalysis_ColabVersion.ipynb  # Notebook for analysis exploration, Collab version
+│   └── time_series_analysis.ipynb    # Notebook for analysis exploration
 ├── scripts/                   # Execution scripts
 │   └── run_timeseries_analysis.py  # Main execution script
 └── output/                    # Output directory

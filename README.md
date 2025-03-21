@@ -41,7 +41,7 @@ Python 3.11 is required to run this package. The following instructions assume y
 
 ```bash
 # Clone the repository
-git clone <repository-url>
+git clone https://github.com/ezeeEric/capu_time_series_analysis
 cd capu_time_series_analysis
 
 # Create and activate virtual environment
@@ -50,6 +50,7 @@ source venv/bin/activate
 
 # Install dependencies
 python -m pip install -r requirements.txt
+python -m pip install -e .
 
 # Install pre-commit hooks
 pre-commit install
@@ -68,14 +69,21 @@ capu_time_series_analysis/
 │   ├── data_loader.py         # Data loading and preprocessing utilities
 │   ├── evaluation.py          # Model evaluation and residual analysis
 │   ├── models.py              # Time series forecasting models
-│   └── visualization.py       # Visualization and logging utilities
+│   ├── visualization.py       # Visualization and logging utilities
+│   └── plotting.py            # Specialized plotting functions for time series data
 ├── data/                      # Data directory
 │   ├── input/                 # Input data files
 │   └── jiaqi_original/        # Original R script and data
+├── notebooks/                 # Jupyter notebooks
+│   ├── exploratory_analysis.ipynb  # Initial data exploration
+│   ├── model_comparison.ipynb     # Detailed model comparison and analysis
+│   └── forecast_visualization.ipynb  # Interactive forecast visualizations
 ├── scripts/                   # Execution scripts
 │   └── run_timeseries_analysis.py  # Main execution script
 └── output/                    # Output directory
-    └── plots/                 # Generated plots
+    ├── plots/                 # Generated static plots
+    ├── models/                # Saved model objects
+    └── forecasts/             # Forecast output data
 ```
 
 ## From R to Python: Adapting the Original Analysis
